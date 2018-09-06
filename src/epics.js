@@ -1,10 +1,12 @@
 import 'rxjs';
-import { combineEpics } from 'redux-observable';
+import { combineEpics, ofType } from 'redux-observable';
 import { FETCH_USER } from './constants';
 import { fetchUserSuccess, fetchUserFailed } from './actions';
-import { ajax } from 'rxjs/observable/dom/ajax';
-import { Observable } from 'rxjs';
+import { of } from "rxjs";
+import { ajax } from "rxjs/ajax";
+import { map, mergeMap, catchError, retry } from 'rxjs/operators';
 
+/*
 export const fetchUser = actions$ =>
   actions$
     .ofType(FETCH_USER)
@@ -15,7 +17,19 @@ export const fetchUser = actions$ =>
         .retry(2)
         .catch(error => Observable.of(fetchUserFailed()))
     );
+*/
 
+const fetchUser = action$ =>
+    action$.pipe(
+        ofType(FETCH_USER),
+        mergeMap(action =>
+            ajax(`https://api.github.com/users/${action.payload.username}`).pipe(
+                map(user => fetchUserSuccess(user)),
+                retry(2),
+                catchError(error => of(fetchUserFailed()))
+            )
+        )
+    );
 
 export default combineEpics(
   fetchUser
