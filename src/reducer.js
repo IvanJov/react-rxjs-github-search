@@ -6,7 +6,7 @@ const initialState = {};
 export const user = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_USER_SUCCESS:
-      return action.payload.user
+      return action.payload.user.response
     case FETCH_USER_FAILED:
       return {};
     default:
